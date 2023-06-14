@@ -602,3 +602,56 @@ function makeDiagonalRed(table) {
 // Где в переменной table находится DOM-элемент для тега <table>
 makeDiagonalRed(table);
 
+
+/* Как должно получиться, можно посмотреть, открыв в браузере страничку с результатом: /result.view/index.html.
+
+P.S. для решения рекомендуется использовать свойства rows таблицы (элемент <table>) и cells элемента строки (элемент <tr>). Подробнее об этом можно прочитать вот тут;
+
+Чтобы сделать ячейку красной, рекомендуется использовать свойство style, которое есть у всех элементов. Почитать подробнее можно вот тут */
+
+let table = document.body.firstElementChild;
+
+for (let i = 0; i < table.rows.length; i++) {
+  let row = table.rows[i];
+  row.cells[i].style.backgroundColor = 'red';
+}
+
+
+/* 17 Напишите функцию highlight, которая внесёт изменения в таблицу.
+
+В качестве аргумента функция принимает элемент таблицы (тег table) c вот такой структурой: */
+
+<table class="js-teachers">
+  <thead>
+    <tr>
+      <td>Name</td>
+      <td>Age</td>
+      <td>Gender</td>
+      <td>Status</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ilia</td>
+      <td>30</td>
+      <td>m</td>
+      <td data-available="true">Free</td>
+    </tr>
+    <tr>
+      <td>Tim</td>
+      <td>39</td>
+      <td>m</td>
+      <td data-available="false">On duty</td>
+    </tr>
+
+    <!-- Строк в таблице может быть больше-->
+  </tbody>
+</table>
+
+/* Функция highlight для каждой строки tr таблицы должна сделать следующее:
+
+Проставить класс available/unavailable в зависимости от значения атрибута data-available у ячейки Status. Если её значение true – класс available, если её значение false – класс unavailable.
+Проставить атрибут hidden, если атрибута data-available нет вообще.
+Проставить класс male/female в зависимости от содержимого ячейки Gender. Если её значение m – класс male, Если её значение f – класс female.
+Добавить inline-стиль style="text-decoration: line-through", если значение ячейки Age меньше 18.
+(!!!) Обращаем отдельное внимание, что все манипуляции нужно делать со СТРОКАМИ таблицы (тег tr). Т.е. вы проверяете ячейку (тег td), но изменяете строку (тег tr). Это распространённая ошибка, из-за которой часто не проходит автоматическая проверка. */
