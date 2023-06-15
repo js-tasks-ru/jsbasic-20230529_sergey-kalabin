@@ -597,6 +597,13 @@ function makeFriendsList(friends) {
 
 function makeDiagonalRed(table) {
   // ваш код
+  let tableDiagonalRed = document.body.firstElementChild;
+
+  for (let i = 0; i < table.rows.length; i++) {
+    let row = table.rows[i];
+    row.cells[i].style.backgroundColor = 'red';
+  }
+  return tableDiagonalRed;
 }
 
 // Где в переменной table находится DOM-элемент для тега <table>
@@ -655,3 +662,36 @@ for (let i = 0; i < table.rows.length; i++) {
 Проставить класс male/female в зависимости от содержимого ячейки Gender. Если её значение m – класс male, Если её значение f – класс female.
 Добавить inline-стиль style="text-decoration: line-through", если значение ячейки Age меньше 18.
 (!!!) Обращаем отдельное внимание, что все манипуляции нужно делать со СТРОКАМИ таблицы (тег tr). Т.е. вы проверяете ячейку (тег td), но изменяете строку (тег tr). Это распространённая ошибка, из-за которой часто не проходит автоматическая проверка. */
+
+
+
+function highlight(table) {
+  for (let tr of table.children[1].rows) { // для каждой строки tr таблицы
+      let available = tr.cells[3];
+      if (available.hasAttribute("data-available"))
+          switch (available.dataset.available) {
+              case "true":
+                  tr.classList.add("available");
+                  break;
+              case "false":
+                  tr.classList.add("unavailable");
+          }
+      else  
+          tr.hidden = true;
+       
+      let gender = tr.cells[2].textContent;
+      switch (gender) {
+          case "m":
+              tr.classList.add("male");
+              break;
+          case "f":
+              tr.classList.add("female");
+      }
+      // Добавить inline-стиль style="text-decoration: line-through", если значение ячейки Age меньше 18.
+      let age = +tr.cells[1].textContent;
+      if (age < 18) tr.style.textDecoration = "line-through";
+  }
+}
+
+let table = document.querySelector(".js-teachers");
+highlight(table);
