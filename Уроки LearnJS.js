@@ -695,3 +695,169 @@ function highlight(table) {
 
 let table = document.querySelector(".js-teachers");
 highlight(table);
+
+
+
+
+//решение учителя
+
+const FIRST_COLUMN = 1;
+const SECOND_COLUMN = 2;
+const THIRD_COLUMN = 3;
+
+function highlight(table) {
+  const actions = {
+    [THIRD_COLUMN]: (root, td) => {
+      if (td.dataset.available === 'true') {
+        root.classList.toggle('available', true);
+      } else if (td.dataset.available === 'false') {
+        root.classList.toggle('unavailable', true);
+      } else if (!td.hasAttribute('data-available')) {
+        root.hidden = true;
+      }
+    },
+    [SECOND_COLUMN]: (root, td) => {
+      if (td.textContent === 'm') {
+        root.classList.toggle('male', true);
+      } else if (td.textContent === 'f') {
+        root.classList.toggle('female', true);
+      }
+    },
+    [FIRST_COLUMN]: (root, td) => {
+      const age = parseInt(td.textContent, 10);
+
+      if (age < 18) {
+        root.style.textDecoration = 'line-through';
+      }
+    },
+  };
+
+  for (const tr of table.rows) {
+    Array.from(tr.cells).forEach((td, index) => {
+      const fn = actions[index];
+
+      if (typeof fn === 'function') {
+        fn(tr, td);
+      }
+    });
+  }
+}
+
+
+
+/* 18 Напишите функцию hideSelf, которая сделает так, чтобы кнопка с классом hide-self-button скрывала себя по нажатию. Чтобы скрыть кнопку, добавьте ей атрибут hidden. */
+
+<button class="hide-self-button">Нажмите, чтобы спрятать</button>
+
+
+function hideSelf() {
+  // ваш код...
+  let button = document.querySelector('.hide-self-button');
+  console.log( button );
+  button.onclick = function() {
+    button.hidden = true;
+  };
+  return button;
+}
+
+hideSelf();
+
+
+
+/* 19 Напишите функцию toggleText, которая сделает так, чтобы при первом нажатии на кнопку с классом toggle-text-button текст <div id="text">Текст</div> исчезал, а при повторном нажатии появлялся. Чтобы скрыть текст, добавьте ему атрибут hidden и наоборот. */
+
+<button class="toggle-text-button">Нажмите, чтобы спрятать/показать текст</button>
+<div id="text">Текст</div>
+
+
+
+function toggleText() {
+  // ваш код...
+  let button = document.querySelector('.toggle-text-button');
+  let text = document.querySelector('.text');
+  button.onclick = function() {
+    if (text.hasAttribute("hidden")) {
+      return text.hidden = true;
+    };
+    return text.hidden = false;
+}
+
+toggleText();  //не работает
+
+
+
+function toggleText() {
+  // ваш код...
+  let button = document.querySelector('.toggle-text-button');
+  let text = document.getElementById('text');
+  button.onclick = function() {
+    if (text.getAttribute("hidden")) {
+      text.removeAttribute("hidden")
+     } else {
+     text.setAttribute("hidden", "hidden")
+     };
+  };
+}
+
+toggleText(); //работает
+
+
+
+/* 20 Учебный проект (пролог): Карусель */
+
+
+/* «Карусель» – компонент интерфейса, который состоит из перемещающихся по клику на стрелки слайдов.
+
+Вы можете посмотреть её вёрстку (пока не «живую» карусель) в файле index.html.
+
+Рабочую карусель можно увидеть вверху страницы проекта.
+
+Такую карусель предстоит написать вам. Вся вёрстка и весь CSS уже готовы, их изменять не нужно. */
+
+function initCarousel() {
+  // ваш код...
+  let carouselInner = document.querySelector('.carousel__inner');
+  let carouselArrowRight = document.querySelector('.carousel__arrow_right');
+  let carouselArrowLeft = document.querySelector('.carousel__arrow_left');
+  let carouselInnerWidth = carouselInner.offsetWidth;
+  carouselArrowRight.onclick = function() {
+    carouselInner.style.transform = 'translateX(`-${carouselInnerWidth}px)`)'
+  };
+  carouselArrowLeft.onclick = function() {
+    carouselInner.style.transform = 'translateX(`+${carouselInnerWidth}px)`)'
+  };
+  
+}
+let carouselInner = document.querySelector('.carousel__inner');
+let carouselInnerWidth = carouselInner.offsetWidth;
+console.log(`- ${carouselInnerWidth}px)`);
+// после того, как эта функция выполнится, в карусели должны начать переключаться слайды
+/* Слайды должны перемещаться влево/вправо при клике по кнопкам вперёд/назад.
+
+Их CSS классы:
+
+.carousel__arrow_right – класс кнопки переключения на слайд вперёд;
+.carousel__arrow_left – класс кнопки переключения на слайд назад;
+Все слайды равны по ширине. В этом задании их для простоты ровно 4, и на это количество можно опираться в коде.
+
+Как (технически) переключается карусель?
+Структура карусели такова, что есть внешний элемент, в котором находится «лента» из подряд идущих слайдов. Внешний элемент имеет фиксированную ширину, поэтому видна только часть ленты (один слайд).
+
+CSS класс элемента-ленты, в котором находятся все слайды – .carousel__inner. Для переключения слайда мы будем сдвигать его на ширину одного слайда.
+
+Допустим, что ширина одного слайда 300px. Она может быть любой, точную ширину элемента, независимо от вёрстки, можно получить при помощи его свойства offsetWidth. Там хранится только число, без px. Подробнее про offsetWidth.
+
+Чтобы переключить на второй слайд, нужно переместить элемент с классом .carousel__inner на 300px влево. Это можно сделать, изменив его свойство transform следующим образом: elem.style.transform = 'translateX(-300px)'.
+
+Мы используем отрицательное значение пикселей, т.к. нам нужно сдвинуть весь элемент влево, если бы значение было положительное, он переместился бы наоборот вправо. Подробнее про свойство style.
+
+Чтобы переключить ещё на один слайд вперёд, нужно наш элемент сдвинуть ещё на 300px, вот так: elem.style.transform = 'translateX(-600px) и т.д.
+
+Скрываем кнопки переключения при достижении крайних слайдов
+Когда пользователь дошёл до 4-ого слайда, нужно скрыть кнопку переключения вперёд, и наоборот, когда пользователь видит первый слайд, нужно скрыть кнопку переключения назад.
+
+Скрывать и показывать кнопки нужно с помощью CSS свойства display, вот так:
+
+carouselArrow.style.display = 'none' – скрыть кнопку,
+carouselArrow.style.display = '' – показать кнопку,
+(Предполагается, что в переменной carouselArrow содержится ссылка на кнопку переключения слайдов). */
