@@ -785,7 +785,7 @@ function toggleText() {
 toggleText();  //не работает
 
 
-
+//мой работающий спойлер
 function toggleText() {
   // ваш код...
   let button = document.querySelector('.toggle-text-button');
@@ -798,6 +798,43 @@ function toggleText() {
      };
   };
 }
+
+toggleText(); //работает
+
+
+
+
+
+  document.addEventListener('click', function(event) {
+    let id = event.target.dataset.toggleId;  
+    if (!id) return;
+
+    let elem = document.getElementById(id);
+
+    elem.hidden = !elem.hidden;
+  });
+
+
+
+/* <button class="toggle-text-button">Нажмите, чтобы спрятать/показать текст</button>
+<div id="text">Текст</div> */
+
+//мой работающий спойлер с делегированием
+function toggleText() {
+  // ваш код...
+  document.addEventListener('click', function(event) {
+    console.log (event);  //объект по которому кликнули
+    if (event.target.classList.contains("toggle-text-button")) {
+      let elem = document.querySelector(text);
+
+      elem.hidden = !elem.hidden;
+    }
+    let button = document.querySelector('.toggle-text-button');
+    if (!button) return;
+
+    
+  });
+} 
 
 toggleText(); //работает
 
@@ -861,3 +898,225 @@ CSS класс элемента-ленты, в котором находятся
 carouselArrow.style.display = 'none' – скрыть кнопку,
 carouselArrow.style.display = '' – показать кнопку,
 (Предполагается, что в переменной carouselArrow содержится ссылка на кнопку переключения слайдов). */
+
+
+
+
+
+function initCarousel() {
+  let carouselInner = document.querySelector('.carousel__inner');
+  let arrowRight = document.querySelector(".carousel__arrow_right");
+  let arrowLeft = document.querySelector(".carousel__arrow_left");
+  let carouselInnerWidth = carouselInner.offsetWidth;
+  let countSlide = document.querySelectorAll('.carousel__slide').length;
+  console.log(countSlide) //4 слайда
+  let activeIndex = 0;
+
+  setArrow(activeIndex, arrowRight, arrowLeft, countSlide);
+
+  arrowRight.addEventListener( "click", () => {
+    activeIndex++;
+    carouselInner.style.transform = `translateX(-${activeIndex * carouselInnerWidth}px)`;
+    setArrow(activeIndex, arrowRight, arrowLeft, countSlide);
+  });
+
+  arrowLeft.addEventListener( "click", () => {
+    activeIndex--;
+    carouselInner.style.transform = `translateX(-${activeIndex * carouselInnerWidth}px)`;
+    setArrow(activeIndex, arrowRight, arrowLeft, countSlide);
+  });
+}
+
+function setArrow(activeIndex, arrowRight, arrowLeft, countSlide) {
+  if (activeIndex === 0) {
+    arrowLeft.style.display = 'none';
+  } else {
+    arrowLeft.style.display = '';
+  }
+
+  if (activeIndex >= countSlide -1) {
+    arrowRight.style.display = 'none';
+  } else {
+    arrowRight.style.display = '';
+  }
+}
+
+
+
+/* 21 Таблица с удаляемыми строками */
+
+
+/* В этом задании нужно создать таблицу с возможностью удаления строк.
+
+Вы получаете данные в виде массива.
+
+Пример данных:
+ */
+
+
+
+let rows = [
+  {
+      name: 'Вася',
+      age: 25,
+      salary: 1000,
+      city: 'Самара'
+  },
+  {
+      name: 'Петя',
+      age: 30,
+      salary: 1500,
+      city: 'Москва'
+  }
+];
+
+
+
+/* class UserTable {
+  constructor(tableRows) {
+    this.tableRows = tableRows;
+  }
+
+  render() {
+    this.elem = document.createElement('TABLE');
+
+    this.elem.innerHTML = this.tableRows
+      .map(({ name, age, salary, city }) => `<tbody><tr><td>${name}</td><td>${age}</td><td>${salary}<td></td>${city}</td><td><button>X</button></td></tr></tbody>`)
+      .map(({ name, age, salary, city }) => `<tbody><tr><td>${name}</td><td>${age}</td><td>${salary}<td></td>${city}</td></tr></tbody>`)
+      .join('');
+
+    this.elem.addEventListener('click', this.onNewsItemClick);
+
+    return this.elem;
+  }
+
+  onNewsItemClick = (event) => {
+    console.log(this.a);
+
+    if (event.target.closest('li')) {
+      event.target.closest('li').style.textDecoration = 'line-through';
+    }
+  }
+}
+
+let table = new UserTable(rows);
+document.body.appendChild(table.elem);
+
+document.body.append( table.render() );
+
+console.log('newComponent:', table); */
+
+
+
+
+//верное решение
+
+class UserTable {
+  #rows;
+  #elem;
+
+  constructor(rows) {
+      this.#rows = rows;
+      this.#elem = document.createElement("table");
+      this.makeHTML();
+  }
+  get elem() {
+      return this.#elem;
+  }
+  makeHTML() {
+      let s = `      
+      <thead>
+      <tr>
+          <th>Имя</th>
+          <th>Возраст</th>
+          <th>Зарплата</th>
+          <th>Город</th>
+          <th></th>
+      </tr>
+      </thead>
+      <tbody>` + this.#rows.map(e => `
+      <tr>
+          <td>${e.name}</td>
+          <td>${e.age}</td>
+          <td>${e.salary}</td>
+          <td>${e.city}</td>
+          <td><button>X</button></td>
+      </tr>              
+              `).join("") + `</tbody>`;
+      this.#elem.innerHTML = s;
+      for (let b of this.#elem.querySelectorAll("button"))
+          b.addEventListener("click", this);
+  }
+   handleEvent(event) {
+      let row = event.target.parentElement.parentElement; // event.target указывает на нажатую кнопку
+      this.#rows.splice(row.rowIndex - 1, 1); // this указывает на свой экземпляр класса
+      row.remove();
+      console.log(this.#rows); // Тестирование
+  }
+}
+
+
+
+/* 22 Учебный проект: Карточка товара */
+
+
+/* Создайте класс ProductCard, описывающий компонент «Карточка товара».
+
+В качестве аргумента в конструктор класса передаётся объект, описывающий товар: */
+
+let product = {
+    name: "Laab kai chicken salad", // название товара
+    price: 10, // цена товара
+    category: "salads", // категория, к которой он относится, нам это понадобится чуть позже
+    image: "laab_kai_chicken_salad.png", // название картинки товара
+    id: "laab-kai-chicken-salad" // уникальный идентификатор товара, нужен для добавления товара в корзину
+}
+
+let productCard = new ProductCard(product);
+
+
+
+
+//моё решение
+
+import createElement from '../../assets/lib/create-element.js';
+
+export default class ProductCard {
+  constructor(product) {
+    this.elem = this.render(product);
+  }
+
+  render(product) {
+    let card = createElement(`
+      <div class="card">
+        <div class="card__top">
+          <img src="/assets/images/products/${product.image}" class="card__image" alt="product">
+          <span class="card__price">€${product.price.toFixed(2)}</span>
+        </div>
+        <div class="card__body">
+          <div class="card__title">${product.name}</div>
+          <button type="button" class="card__button">
+            <img src="/assets/images/icons/plus-icon.svg" alt="icon">
+          </button>
+        </div>
+      </div>
+    `);
+
+    this.addEvents(card, product.id);
+
+    return card;
+  }
+
+  addEvents(elem, id) {
+    elem.querySelector(".card__button").addEventListener("click", event => {
+      event.target.closest(".card").dispatchEvent(new CustomEvent("product-add", {
+        detail: id,
+        bubbles: true
+      }))
+    });
+  }
+}
+
+
+
+
