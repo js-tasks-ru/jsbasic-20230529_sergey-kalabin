@@ -803,19 +803,6 @@ toggleText(); //работает
 
 
 
-
-
-  document.addEventListener('click', function(event) {
-    let id = event.target.dataset.toggleId;  
-    if (!id) return;
-
-    let elem = document.getElementById(id);
-
-    elem.hidden = !elem.hidden;
-  });
-
-
-
 /* <button class="toggle-text-button">Нажмите, чтобы спрятать/показать текст</button>
 <div id="text">Текст</div> */
 
@@ -1119,4 +1106,318 @@ export default class ProductCard {
 
 
 
+
+
+/* 23 Учебный проект: Лента-Меню */
+
+/* Создайте класс RibbonMenu, описывающий компонент «Ленты-Меню»(для простоты будем называть его «меню»). Данный компонент представляет из себя список категорий товаров ресторана. В конечном итоге, мы будем показывать товары только той категории, которую выбрал пользователь. */
+
+export default class RibbonMenu {
+  constructor(categories) {
+    this.categories = categories;
+    this.elem = this.render(categories);
+    this.ribbonInner = this.elem.querySelector('.ribbon__inner');
+    this.ribbonArrowRight = this.elem.querySelector('.ribbon__arrow_right');
+    this.ribbonArrowLeft = this.elem.querySelector('.ribbon__arrow_left');
+    this.ribbonArrows ();
+    this.ribbonArrowRight.addEventListener('click', () => this.scrollRight());
+    this.ribbonArrowLeft.addEventListener('click', () => this.scrollLeft());
+    this.elem.addEventListener('click', (event) => this.chooseRibbonItem(event));
+  }
+  render(categories){
+    let ribbon = document.createElement('div');
+    ribbon.classList.add('ribbon');
+    ribbon.innerHTML = `
+    <button class="ribbon__arrow ribbon__arrow_left ribbon__arrow_visible">
+      <img src="/assets/images/icons/angle-icon.svg" alt="icon">
+    </button>
+    <nav class="ribbon__inner"></nav>
+    <button class="ribbon__arrow ribbon__arrow_right">
+      <img src="/assets/images/icons/angle-icon.svg" alt="icon">
+    </button>`;
+    let ribbonInner = ribbon.querySelector('.ribbon__inner');
+    let ribbonElem = categories.map(category => `
+    <a href="#" class="ribbon__item" data-id="${category.id}">${category.name}</a>
+    `).join('');
+    ribbonInner.innerHTML = ribbonElem;
+    return ribbon;
+  }
+
+  scrollRight() {
+    this.ribbonInner.scrollBy(350, 0);
+  }
+
+  scrollLeft() {
+    this.ribbonInner.scrollBy(-350, 0);
+  }
+
+  ribbonArrows (){
+    let ribbonInner = this.elem.querySelector('.ribbon__inner');
+    let ribbonArrowRight = this.elem.querySelector('.ribbon__arrow_right');
+    let ribbonArrowLeft = this.elem.querySelector('.ribbon__arrow_left');
+    let arrows = this.elem.querySelectorAll('.ribbon__arrow');
+    ribbonArrowRight.classList.add('ribbon__arrow_visible');
+    ribbonArrowLeft.classList.remove('ribbon__arrow_visible');
+
+    for (let arrow of arrows) {
+      arrow.addEventListener('click', function () {
+        let scrollLeft = ribbonInner.scrollLeft;
+        let clientWidth = ribbonInner.clientWidth;
+        let scrollWidth = ribbonInner.scrollWidth;
+        let scrollRight = scrollWidth - scrollLeft - clientWidth;
+
+        if (scrollLeft == 0 ) {
+          ribbonArrowLeft.classList.toggle('ribbon__arrow_visible');
+        } 
+        if (scrollRight < 1 ) {
+          ribbonArrowRight.classList.toggle('ribbon__arrow_visible');
+        } 
+    });
+    }
+  } 
+
+  chooseRibbonItem(event) {
+    let elems = this.elem.querySelectorAll('.ribbon__item');
+    Array.from(elems).map(elem => {
+        elem.classList.remove('ribbon__item_active');
+        event.preventDefault();
+        event.target.classList.add('ribbon__item_active');
+
+        this.elem.dispatchEvent(new CustomEvent('ribbon-select', {
+          detail: event.target.dataset.id,
+          bubbles: true
+        }));
+    });
+  }
+}
+
+
+
+
+
+
+/* 24 Учебный проект: Модальное окно */
+
+
+/* "Модальное окно" - компонент, который открывается поверх основного интерфейса и блокирует работу с ним, пока пользователь его не закроет. Вы уже сталкивались с функциями, открывающими стандартные браузерные модальные окна - это функции `alert`, `prompt`, `confirm`. Но они нам не всегда подходят, ведь мы не можем управлять их внешним видом, а также влиять на их содержимое. Поэтому для нужд проекта мы создадим свой компонент, лишённый этих недостатков. */
+
+
+
+
+export default class Modal {
+  constructor() {
+    this.render();
+    this.elem.addEventListener('click', (event) => this.onClick(event));
+  }
+  render() {
+    this.elem = createElement(`
+      <div class="modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__inner">
+          <div class="modal__header">
+            <button type="button" class="modal__close">
+              <img src="/assets/images/icons/cross-icon.svg" alt="close-icon" />
+            </button>
+            <h3 class="modal__title"></h3>
+          </div>
+          <div class="modal__body"></div>
+        </div>
+      </div>
+    `);
+  }
+
+  sub(ref) {
+    return this.elem.querySelector(`.modal__${ref}`);
+  }
+
+  open() {
+    document.body.append(this.elem);
+    document.body.classList.add('is-modal-open');
+
+    this._keydownEventListener = (event) => this.onDocumentKeyDown(event);
+    document.addEventListener('keydown', this._keydownEventListener);
+
+    if (this.elem.querySelector('[autofocus]')) {
+      this.elem.querySelector('[autofocus]').focus();
+    }
+  }
+
+  onClick(event) {
+    if (event.target.closest('.modal__close')) {
+      event.preventDefault();
+      this.close();
+    }
+  }
+
+  onDocumentKeyDown(event) {
+    if (event.code === 'Escape') {
+      event.preventDefault();
+      this.close();
+    }
+  }
+
+  setTitle(title) {
+    this.sub('title').textContent = title;
+  }
+
+  setBody(node) {
+    this.sub('body').innerHTML = '';
+    this.sub('body').append(node);
+  }
+
+  close() {
+    document.removeEventListener('keydown', this._keydownEventListener);
+    document.body.classList.remove('is-modal-open');
+    this.elem.remove();
+  }
+}
+
+
+
+
+
+/* 25 Учебный проект: Пошаговый слайдер, часть 1 */
+
+
+/* Слайдер – это компонент интерфейса, позволяющий пользователю выбрать числовое значение в указанных пределах.
+
+В современном браузерном HTML он представлен инпутом со специальным типом:
+ */
+/*<input type="range" id="volume" name="volume" min="0" max="11">
+
+/* Но для сложных проектов он не всегда подходит, т.к. ограничен в возможностях изменения дизайна и функциоальности. Поэтому мы создадим свой слайдер, который полностью отвечает нашим требованиям.
+
+Мы будем его использовать для выбора максимальной остроты товаров. Это нужно, чтобы показывать в списке товаров только те, которые соответствуют заданной максимальной остроте.
+
+В этой задаче мы создадим слайдер, который меняет свое значение по клику. А в следующей – добавим возможность «перетягивания» бегунка (пока это не нужно).
+
+Cоздайте класс StepSlider, описывающий компонент «Пошаговый слайдер» (для простоты будем называть его просто слайдер). */
+
+
+
+
+import createElement from '../../assets/lib/create-element.js';
+
+export default class StepSlider {
+  constructor({ steps, value = 0 }) {
+    this.steps = steps;
+    this.segments = steps - 1;
+    this.render();
+    this.addEventListeners();
+    this.setValue(value);
+  }
+  render() {
+    this.elem = createElement(`
+      <div class="slider">
+        <div class="slider__thumb">
+          <span class="slider__value"></span>
+        </div>
+        <div class="slider__progress"></div>
+        <div class="slider__steps">
+          ${'<span></span>'.repeat(this.steps)}
+        </div>
+      </div>
+    `);
+  }
+
+  setValue(value) {
+    this.value = value;
+
+    let valuePercents = (value / this.segments) * 100;
+
+    this.sub('thumb').style.left = `${valuePercents}%`;
+    this.sub('progress').style.width = `${valuePercents}%`;
+
+    this.sub('value').innerHTML = value;
+
+    if (this.sub('step-active')) {
+      this.sub('step-active').classList.remove('slider__step-active');
+    }
+
+    this.sub('steps').children[this.value].classList.add('slider__step-active');
+  }
+
+  addEventListeners() {
+    this.elem.onclick = this.onClick;
+  }
+
+  onClick = event => {
+    let newLeft = (event.clientX - this.elem.getBoundingClientRect().left) / this.elem.offsetWidth;
+
+    this.setValue(Math.round(this.segments * newLeft));
+
+    this.elem.dispatchEvent(
+      new CustomEvent('slider-change', {
+        detail: this.value,
+        bubbles: true
+      })
+    );
+  }
+
+  sub(ref) {
+    return this.elem.querySelector(`.slider__${ref}`);
+  }
+}
+
+
+
+
+
+/* 26 Учебный проект: Пошаговый слайдер, часть 2 */
+
+
+/* Изменение значения с помощью Drag-and-Drop.
+За основу работы этого механизма взят алгоритм из статьи Drag’n’Drop с событиями мыши. Мы настоятельно рекомендуем разобраться в принципе работы примера из статьи перед тем как приступать у решению.
+
+Принцип работы Drag-and-Drop:
+
+Пользователь наводит курсор мыши на ползунок слайдера и кликает по нему.
+Зажав кнопку мыши он перемещает ползунок влево или вправо. Ползунок перемещается по слайдеру, следуя за курсором.
+Пользователь отпускает кнопку мыши в любом месте слайдера.
+Ползунок перемещается на ближайший шаг слайдера. */
+
+
+
+
+  // Drag and Drop
+  // 1) mousedown - готовим элемент к перемещению (position: absolute + z-index)
+  // 2) mousemove - передвигаем элемент на новые координаты (left, top)
+  // 3) mouseup - остановить перенос элемента + чистка DnD
+
+
+  let sliderThumb = document.querySelector('.slider__thumb');
+
+
+  sliderThumb.onpointerdown = function(event) {
+    console.log('event.pointerType:', event.pointerType);
+    console.log( sliderThumb.getBoundingClientRect() );
+    let shiftX = event.clientX - sliderThumb.getBoundingClientRect().left;
+    let shiftY = event.clientY - sliderThumb.getBoundingClientRect().top;
+    let parentBoxSlider = document.querySelector('.slider')
+
+    // 1
+    parentBoxSlider.classList.add('slider_dragging');
+    sliderThumb.style.position = 'absolute';
+    sliderThumb.style.zIndex = 9999999;
+
+
+    // 2
+    function onMouseMove(event) {
+      let x = event.pageX - shiftX;
+      let y = event.pageY - shiftY;
+
+      sliderThumb.style.left = `${x}px`;
+      sliderThumb.style.top = `${y}px`;
+    };
+    document.addEventListener('pointermove', onMouseMove);
+
+    // 3
+    sliderThumb.onpointerup = function() {
+      parentBoxSlider.classList.remove('slider_dragging');
+      document.removeEventListener('pointermove', onMouseMove);
+      sliderThumb.onpointerup = null;
+    };
+  }
+
+  sliderThumb.ondragstart = () => false;
 
