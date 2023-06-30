@@ -785,7 +785,7 @@ function toggleText() {
 toggleText();  //не работает
 
 
-
+//мой работающий спойлер
 function toggleText() {
   // ваш код...
   let button = document.querySelector('.toggle-text-button');
@@ -798,6 +798,30 @@ function toggleText() {
      };
   };
 }
+
+toggleText(); //работает
+
+
+
+/* <button class="toggle-text-button">Нажмите, чтобы спрятать/показать текст</button>
+<div id="text">Текст</div> */
+
+//мой работающий спойлер с делегированием
+function toggleText() {
+  // ваш код...
+  document.addEventListener('click', function(event) {
+    console.log (event);  //объект по которому кликнули
+    if (event.target.classList.contains("toggle-text-button")) {
+      let elem = document.querySelector(text);
+
+      elem.hidden = !elem.hidden;
+    }
+    let button = document.querySelector('.toggle-text-button');
+    if (!button) return;
+
+    
+  });
+} 
 
 toggleText(); //работает
 
@@ -861,3 +885,539 @@ CSS класс элемента-ленты, в котором находятся
 carouselArrow.style.display = 'none' – скрыть кнопку,
 carouselArrow.style.display = '' – показать кнопку,
 (Предполагается, что в переменной carouselArrow содержится ссылка на кнопку переключения слайдов). */
+
+
+
+
+
+function initCarousel() {
+  let carouselInner = document.querySelector('.carousel__inner');
+  let arrowRight = document.querySelector(".carousel__arrow_right");
+  let arrowLeft = document.querySelector(".carousel__arrow_left");
+  let carouselInnerWidth = carouselInner.offsetWidth;
+  let countSlide = document.querySelectorAll('.carousel__slide').length;
+  console.log(countSlide) //4 слайда
+  let activeIndex = 0;
+
+  setArrow(activeIndex, arrowRight, arrowLeft, countSlide);
+
+  arrowRight.addEventListener( "click", () => {
+    activeIndex++;
+    carouselInner.style.transform = `translateX(-${activeIndex * carouselInnerWidth}px)`;
+    setArrow(activeIndex, arrowRight, arrowLeft, countSlide);
+  });
+
+  arrowLeft.addEventListener( "click", () => {
+    activeIndex--;
+    carouselInner.style.transform = `translateX(-${activeIndex * carouselInnerWidth}px)`;
+    setArrow(activeIndex, arrowRight, arrowLeft, countSlide);
+  });
+}
+
+function setArrow(activeIndex, arrowRight, arrowLeft, countSlide) {
+  if (activeIndex === 0) {
+    arrowLeft.style.display = 'none';
+  } else {
+    arrowLeft.style.display = '';
+  }
+
+  if (activeIndex >= countSlide -1) {
+    arrowRight.style.display = 'none';
+  } else {
+    arrowRight.style.display = '';
+  }
+}
+
+
+
+/* 21 Таблица с удаляемыми строками */
+
+
+/* В этом задании нужно создать таблицу с возможностью удаления строк.
+
+Вы получаете данные в виде массива.
+
+Пример данных:
+ */
+
+
+
+let rows = [
+  {
+      name: 'Вася',
+      age: 25,
+      salary: 1000,
+      city: 'Самара'
+  },
+  {
+      name: 'Петя',
+      age: 30,
+      salary: 1500,
+      city: 'Москва'
+  }
+];
+
+
+
+/* class UserTable {
+  constructor(tableRows) {
+    this.tableRows = tableRows;
+  }
+
+  render() {
+    this.elem = document.createElement('TABLE');
+
+    this.elem.innerHTML = this.tableRows
+      .map(({ name, age, salary, city }) => `<tbody><tr><td>${name}</td><td>${age}</td><td>${salary}<td></td>${city}</td><td><button>X</button></td></tr></tbody>`)
+      .map(({ name, age, salary, city }) => `<tbody><tr><td>${name}</td><td>${age}</td><td>${salary}<td></td>${city}</td></tr></tbody>`)
+      .join('');
+
+    this.elem.addEventListener('click', this.onNewsItemClick);
+
+    return this.elem;
+  }
+
+  onNewsItemClick = (event) => {
+    console.log(this.a);
+
+    if (event.target.closest('li')) {
+      event.target.closest('li').style.textDecoration = 'line-through';
+    }
+  }
+}
+
+let table = new UserTable(rows);
+document.body.appendChild(table.elem);
+
+document.body.append( table.render() );
+
+console.log('newComponent:', table); */
+
+
+
+
+//верное решение
+
+class UserTable {
+  #rows;
+  #elem;
+
+  constructor(rows) {
+      this.#rows = rows;
+      this.#elem = document.createElement("table");
+      this.makeHTML();
+  }
+  get elem() {
+      return this.#elem;
+  }
+  makeHTML() {
+      let s = `      
+      <thead>
+      <tr>
+          <th>Имя</th>
+          <th>Возраст</th>
+          <th>Зарплата</th>
+          <th>Город</th>
+          <th></th>
+      </tr>
+      </thead>
+      <tbody>` + this.#rows.map(e => `
+      <tr>
+          <td>${e.name}</td>
+          <td>${e.age}</td>
+          <td>${e.salary}</td>
+          <td>${e.city}</td>
+          <td><button>X</button></td>
+      </tr>              
+              `).join("") + `</tbody>`;
+      this.#elem.innerHTML = s;
+      for (let b of this.#elem.querySelectorAll("button"))
+          b.addEventListener("click", this);
+  }
+   handleEvent(event) {
+      let row = event.target.parentElement.parentElement; // event.target указывает на нажатую кнопку
+      this.#rows.splice(row.rowIndex - 1, 1); // this указывает на свой экземпляр класса
+      row.remove();
+      console.log(this.#rows); // Тестирование
+  }
+}
+
+
+
+/* 22 Учебный проект: Карточка товара */
+
+
+/* Создайте класс ProductCard, описывающий компонент «Карточка товара».
+
+В качестве аргумента в конструктор класса передаётся объект, описывающий товар: */
+
+let product = {
+    name: "Laab kai chicken salad", // название товара
+    price: 10, // цена товара
+    category: "salads", // категория, к которой он относится, нам это понадобится чуть позже
+    image: "laab_kai_chicken_salad.png", // название картинки товара
+    id: "laab-kai-chicken-salad" // уникальный идентификатор товара, нужен для добавления товара в корзину
+}
+
+let productCard = new ProductCard(product);
+
+
+
+
+//моё решение
+
+import createElement from '../../assets/lib/create-element.js';
+
+export default class ProductCard {
+  constructor(product) {
+    this.elem = this.render(product);
+  }
+
+  render(product) {
+    let card = createElement(`
+      <div class="card">
+        <div class="card__top">
+          <img src="/assets/images/products/${product.image}" class="card__image" alt="product">
+          <span class="card__price">€${product.price.toFixed(2)}</span>
+        </div>
+        <div class="card__body">
+          <div class="card__title">${product.name}</div>
+          <button type="button" class="card__button">
+            <img src="/assets/images/icons/plus-icon.svg" alt="icon">
+          </button>
+        </div>
+      </div>
+    `);
+
+    this.addEvents(card, product.id);
+
+    return card;
+  }
+
+  addEvents(elem, id) {
+    elem.querySelector(".card__button").addEventListener("click", event => {
+      event.target.closest(".card").dispatchEvent(new CustomEvent("product-add", {
+        detail: id,
+        bubbles: true
+      }))
+    });
+  }
+}
+
+
+
+
+
+/* 23 Учебный проект: Лента-Меню */
+
+/* Создайте класс RibbonMenu, описывающий компонент «Ленты-Меню»(для простоты будем называть его «меню»). Данный компонент представляет из себя список категорий товаров ресторана. В конечном итоге, мы будем показывать товары только той категории, которую выбрал пользователь. */
+
+export default class RibbonMenu {
+  constructor(categories) {
+    this.categories = categories;
+    this.elem = this.render(categories);
+    this.ribbonInner = this.elem.querySelector('.ribbon__inner');
+    this.ribbonArrowRight = this.elem.querySelector('.ribbon__arrow_right');
+    this.ribbonArrowLeft = this.elem.querySelector('.ribbon__arrow_left');
+    this.ribbonArrows ();
+    this.ribbonArrowRight.addEventListener('click', () => this.scrollRight());
+    this.ribbonArrowLeft.addEventListener('click', () => this.scrollLeft());
+    this.elem.addEventListener('click', (event) => this.chooseRibbonItem(event));
+  }
+  render(categories){
+    let ribbon = document.createElement('div');
+    ribbon.classList.add('ribbon');
+    ribbon.innerHTML = `
+    <button class="ribbon__arrow ribbon__arrow_left ribbon__arrow_visible">
+      <img src="/assets/images/icons/angle-icon.svg" alt="icon">
+    </button>
+    <nav class="ribbon__inner"></nav>
+    <button class="ribbon__arrow ribbon__arrow_right">
+      <img src="/assets/images/icons/angle-icon.svg" alt="icon">
+    </button>`;
+    let ribbonInner = ribbon.querySelector('.ribbon__inner');
+    let ribbonElem = categories.map(category => `
+    <a href="#" class="ribbon__item" data-id="${category.id}">${category.name}</a>
+    `).join('');
+    ribbonInner.innerHTML = ribbonElem;
+    return ribbon;
+  }
+
+  scrollRight() {
+    this.ribbonInner.scrollBy(350, 0);
+  }
+
+  scrollLeft() {
+    this.ribbonInner.scrollBy(-350, 0);
+  }
+
+  ribbonArrows (){
+    let ribbonInner = this.elem.querySelector('.ribbon__inner');
+    let ribbonArrowRight = this.elem.querySelector('.ribbon__arrow_right');
+    let ribbonArrowLeft = this.elem.querySelector('.ribbon__arrow_left');
+    let arrows = this.elem.querySelectorAll('.ribbon__arrow');
+    ribbonArrowRight.classList.add('ribbon__arrow_visible');
+    ribbonArrowLeft.classList.remove('ribbon__arrow_visible');
+
+    for (let arrow of arrows) {
+      arrow.addEventListener('click', function () {
+        let scrollLeft = ribbonInner.scrollLeft;
+        let clientWidth = ribbonInner.clientWidth;
+        let scrollWidth = ribbonInner.scrollWidth;
+        let scrollRight = scrollWidth - scrollLeft - clientWidth;
+
+        if (scrollLeft == 0 ) {
+          ribbonArrowLeft.classList.toggle('ribbon__arrow_visible');
+        } 
+        if (scrollRight < 1 ) {
+          ribbonArrowRight.classList.toggle('ribbon__arrow_visible');
+        } 
+    });
+    }
+  } 
+
+  chooseRibbonItem(event) {
+    let elems = this.elem.querySelectorAll('.ribbon__item');
+    Array.from(elems).map(elem => {
+        elem.classList.remove('ribbon__item_active');
+        event.preventDefault();
+        event.target.classList.add('ribbon__item_active');
+
+        this.elem.dispatchEvent(new CustomEvent('ribbon-select', {
+          detail: event.target.dataset.id,
+          bubbles: true
+        }));
+    });
+  }
+}
+
+
+
+
+
+
+/* 24 Учебный проект: Модальное окно */
+
+
+/* "Модальное окно" - компонент, который открывается поверх основного интерфейса и блокирует работу с ним, пока пользователь его не закроет. Вы уже сталкивались с функциями, открывающими стандартные браузерные модальные окна - это функции `alert`, `prompt`, `confirm`. Но они нам не всегда подходят, ведь мы не можем управлять их внешним видом, а также влиять на их содержимое. Поэтому для нужд проекта мы создадим свой компонент, лишённый этих недостатков. */
+
+
+
+
+export default class Modal {
+  constructor() {
+    this.render();
+    this.elem.addEventListener('click', (event) => this.onClick(event));
+  }
+  render() {
+    this.elem = createElement(`
+      <div class="modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__inner">
+          <div class="modal__header">
+            <button type="button" class="modal__close">
+              <img src="/assets/images/icons/cross-icon.svg" alt="close-icon" />
+            </button>
+            <h3 class="modal__title"></h3>
+          </div>
+          <div class="modal__body"></div>
+        </div>
+      </div>
+    `);
+  }
+
+  sub(ref) {
+    return this.elem.querySelector(`.modal__${ref}`);
+  }
+
+  open() {
+    document.body.append(this.elem);
+    document.body.classList.add('is-modal-open');
+
+    this._keydownEventListener = (event) => this.onDocumentKeyDown(event);
+    document.addEventListener('keydown', this._keydownEventListener);
+
+    if (this.elem.querySelector('[autofocus]')) {
+      this.elem.querySelector('[autofocus]').focus();
+    }
+  }
+
+  onClick(event) {
+    if (event.target.closest('.modal__close')) {
+      event.preventDefault();
+      this.close();
+    }
+  }
+
+  onDocumentKeyDown(event) {
+    if (event.code === 'Escape') {
+      event.preventDefault();
+      this.close();
+    }
+  }
+
+  setTitle(title) {
+    this.sub('title').textContent = title;
+  }
+
+  setBody(node) {
+    this.sub('body').innerHTML = '';
+    this.sub('body').append(node);
+  }
+
+  close() {
+    document.removeEventListener('keydown', this._keydownEventListener);
+    document.body.classList.remove('is-modal-open');
+    this.elem.remove();
+  }
+}
+
+
+
+
+
+/* 25 Учебный проект: Пошаговый слайдер, часть 1 */
+
+
+/* Слайдер – это компонент интерфейса, позволяющий пользователю выбрать числовое значение в указанных пределах.
+
+В современном браузерном HTML он представлен инпутом со специальным типом:
+ */
+/*<input type="range" id="volume" name="volume" min="0" max="11">
+
+/* Но для сложных проектов он не всегда подходит, т.к. ограничен в возможностях изменения дизайна и функциоальности. Поэтому мы создадим свой слайдер, который полностью отвечает нашим требованиям.
+
+Мы будем его использовать для выбора максимальной остроты товаров. Это нужно, чтобы показывать в списке товаров только те, которые соответствуют заданной максимальной остроте.
+
+В этой задаче мы создадим слайдер, который меняет свое значение по клику. А в следующей – добавим возможность «перетягивания» бегунка (пока это не нужно).
+
+Cоздайте класс StepSlider, описывающий компонент «Пошаговый слайдер» (для простоты будем называть его просто слайдер). */
+
+
+
+
+import createElement from '../../assets/lib/create-element.js';
+
+export default class StepSlider {
+  constructor({ steps, value = 0 }) {
+    this.steps = steps;
+    this.segments = steps - 1;
+    this.render();
+    this.addEventListeners();
+    this.setValue(value);
+  }
+  render() {
+    this.elem = createElement(`
+      <div class="slider">
+        <div class="slider__thumb">
+          <span class="slider__value"></span>
+        </div>
+        <div class="slider__progress"></div>
+        <div class="slider__steps">
+          ${'<span></span>'.repeat(this.steps)}
+        </div>
+      </div>
+    `);
+  }
+
+  setValue(value) {
+    this.value = value;
+
+    let valuePercents = (value / this.segments) * 100;
+
+    this.sub('thumb').style.left = `${valuePercents}%`;
+    this.sub('progress').style.width = `${valuePercents}%`;
+
+    this.sub('value').innerHTML = value;
+
+    if (this.sub('step-active')) {
+      this.sub('step-active').classList.remove('slider__step-active');
+    }
+
+    this.sub('steps').children[this.value].classList.add('slider__step-active');
+  }
+
+  addEventListeners() {
+    this.elem.onclick = this.onClick;
+  }
+
+  onClick = event => {
+    let newLeft = (event.clientX - this.elem.getBoundingClientRect().left) / this.elem.offsetWidth;
+
+    this.setValue(Math.round(this.segments * newLeft));
+
+    this.elem.dispatchEvent(
+      new CustomEvent('slider-change', {
+        detail: this.value,
+        bubbles: true
+      })
+    );
+  }
+
+  sub(ref) {
+    return this.elem.querySelector(`.slider__${ref}`);
+  }
+}
+
+
+
+
+
+/* 26 Учебный проект: Пошаговый слайдер, часть 2 */
+
+
+/* Изменение значения с помощью Drag-and-Drop.
+За основу работы этого механизма взят алгоритм из статьи Drag’n’Drop с событиями мыши. Мы настоятельно рекомендуем разобраться в принципе работы примера из статьи перед тем как приступать у решению.
+
+Принцип работы Drag-and-Drop:
+
+Пользователь наводит курсор мыши на ползунок слайдера и кликает по нему.
+Зажав кнопку мыши он перемещает ползунок влево или вправо. Ползунок перемещается по слайдеру, следуя за курсором.
+Пользователь отпускает кнопку мыши в любом месте слайдера.
+Ползунок перемещается на ближайший шаг слайдера. */
+
+
+
+
+  // Drag and Drop
+  // 1) mousedown - готовим элемент к перемещению (position: absolute + z-index)
+  // 2) mousemove - передвигаем элемент на новые координаты (left, top)
+  // 3) mouseup - остановить перенос элемента + чистка DnD
+
+
+  let sliderThumb = document.querySelector('.slider__thumb');
+
+
+  sliderThumb.onpointerdown = function(event) {
+    console.log('event.pointerType:', event.pointerType);
+    console.log( sliderThumb.getBoundingClientRect() );
+    let shiftX = event.clientX - sliderThumb.getBoundingClientRect().left;
+    let shiftY = event.clientY - sliderThumb.getBoundingClientRect().top;
+    let parentBoxSlider = document.querySelector('.slider')
+
+    // 1
+    parentBoxSlider.classList.add('slider_dragging');
+    sliderThumb.style.position = 'absolute';
+    sliderThumb.style.zIndex = 9999999;
+
+
+    // 2
+    function onMouseMove(event) {
+      let x = event.pageX - shiftX;
+      let y = event.pageY - shiftY;
+
+      sliderThumb.style.left = `${x}px`;
+      sliderThumb.style.top = `${y}px`;
+    };
+    document.addEventListener('pointermove', onMouseMove);
+
+    // 3
+    sliderThumb.onpointerup = function() {
+      parentBoxSlider.classList.remove('slider_dragging');
+      document.removeEventListener('pointermove', onMouseMove);
+      sliderThumb.onpointerup = null;
+    };
+  }
+
+  sliderThumb.ondragstart = () => false;
+
